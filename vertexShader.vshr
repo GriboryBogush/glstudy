@@ -1,0 +1,17 @@
+#version 330 core
+
+layout (location = 0) in vec3 in_pos;
+layout (location = 1) in vec3 in_color;
+layout  (location = 2) in vec2 in_textcoord;
+
+out vec3 color;
+out vec2 textcoord;
+
+uniform mat4 trans_mat;
+
+void main()
+{
+	gl_Position = trans_mat * vec4(in_pos, 1.0f);
+	color       = in_color;
+	textcoord   = in_textcoord;
+}
