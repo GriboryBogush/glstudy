@@ -1,3 +1,5 @@
+///// A file to load shaders, it'll print out error if anything goes
+///// wrong. For now that's all the error handling I need
 #ifndef IO_SHADER
 #define IO_SHADER
 
@@ -7,9 +9,7 @@
 
 int compileShader(const char* filename, GLenum shaderType);
 
-/*
-	call cleanShader after this
-*/
+// Call cleanShader after this
 int linkShader(int vshrhandle, int fshrhandle);
 int cleanShader(int shader);
 

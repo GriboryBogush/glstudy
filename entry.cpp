@@ -1,11 +1,12 @@
-// : Defines the entry point for the console application.
-//
+/////  
+/////  Main function; for now most of the code is here
+/////
 #include"maininc.h"
 #include"ioshader.h"
 #include"stb_image.h"
 
 
-//--- constants
+///  Constants. Should probably load this from a config file or smth...
 const int WIN_WIDTH = 800;
 const int WIN_HEIGHT = 600;
 
@@ -22,13 +23,13 @@ void processInput(GLFWwindow *window, float* img_opacity);
 
 int main(int arc, char** args)
 {
-
+	//// Load and initalize glfw and glad
 	glfwInit();
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-	//initalize window
+	///initalize window
 	GLFWwindow* window = glfwCreateWindow(800, 600, "OpenGL Test", NULL, NULL);
 
 	if (window == NULL) {
@@ -43,14 +44,14 @@ int main(int arc, char** args)
 	glfwMakeContextCurrent(window);
 	glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
 
-	//load glad
+	///load glad
 	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
 		std::cout << "Failed to initialize GLAD" << std::endl;
 		return -1;
 	}
 
-	// build and compile our shader program
-	// ------------------------------------
+	/// build and compile our shader program
+	/// ------------------------------------
 
 	int vshrhandle = compileShader(vertexShaderFile, GL_VERTEX_SHADER);
 	int fshrhandle = compileShader(fragmentShaderFile, GL_FRAGMENT_SHADER);
@@ -59,8 +60,8 @@ int main(int arc, char** args)
 	cleanShader(fshrhandle);
 
 
-	// set up vertex data (and buffer(s)) and configure vertex attributes
-	// ------------------------------------------------------------------
+	/// set up vertex data (and buffer(s)) and configure vertex attributes
+	/// ------------------------------------------------------------------
 	float vertices[] = {
 		// positions          // colors           // texture coords
 		0.5f,  0.5f, 0.0f,   1.0f, 0.0f, 0.0f,   1.0f, 1.0f,   // top right
@@ -74,9 +75,13 @@ int main(int arc, char** args)
 
 
 
+	//// Load all the needed data into a VAO
+	//   ------------------------------------
+	// VAO is for storing function calls, 
+	// VBO is for storing vertices (position, color, texture coords...)
+	// EBO is for storing indices of the vertices to be drawn
 
-
-	unsigned int VBO, VAO, EBO;
+	unsigned int VAO, VBO, EBO;
 	glGenVertexArrays(1, &VAO);
 	glGenBuffers(1, &VBO);
 	glGenBuffers(1, &EBO);
@@ -102,8 +107,8 @@ int main(int arc, char** args)
 
 	glBindVertexArray(0);
 
-	// load texture 
-	// ------------
+	//// Load textures
+	//// -------------
 
 	unsigned int texture1, texture2;
 	glGenTextures(1, &texture1);
@@ -114,6 +119,7 @@ int main(int arc, char** args)
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
+	/// Load image amd bind it? to a gl texture
 	stbi_set_flip_vertically_on_load(true);
 	int width, height, nrChannels;
 	unsigned char *data = stbi_load("container.jpg", &width, &height, &nrChannels, 0);
@@ -128,7 +134,9 @@ int main(int arc, char** args)
 	}
 
 	stbi_image_free(data);
-	//second
+
+
+	/// Second texture  (should probably turn this into a function?..)
 	glGenTextures(1, &texture2);
 	glBindTexture(GL_TEXTURE_2D, texture2);
 
@@ -151,23 +159,23 @@ int main(int arc, char** args)
 
 	stbi_image_free(data);
 
-	//better be input class
+	//Varibles for loading into uniforms(better turn this into a class)
 	float img_opacity = 0.3f;
 	//...
 
-	//MATH
+	///MATH. Mostly matrix operations (should pobably be wrapped in a function or a class to manage whatever's needed)
 
 	glm::mat4 trans = glm::mat4(1);								//rotation axis;
 	trans = glm::rotate(trans, glm::radians(90.0f), glm::vec3(0.0, 0.0, 1.0));
 	trans = glm::scale(trans, glm::vec3(0.5, 0.5, 0.5));
 
-	//uniforms!
+	/// Load uniforms
 	glUseProgram(shaderProgram);
 	glUniform1i(glGetUniformLocation(shaderProgram, "texture1"), 0);
 	glUniform1i(glGetUniformLocation(shaderProgram, "texture2"), 1);
 	glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "trans_mat"), 1, GL_FALSE, glm::value_ptr(trans));
 
-	//main loop
+	//// Main draw loop
 	while (!glfwWindowShouldClose(window)) {
 
 		processInput(window, &img_opacity);
@@ -177,7 +185,7 @@ int main(int arc, char** args)
 		glClear(GL_COLOR_BUFFER_BIT);
 
 		glUseProgram(shaderProgram);
-		glUniform1f(glGetUniformLocation(shaderProgram, "img_opacity"), img_opacity);
+		glUniform1f(glGetUniformLocation(shaderProgram, "img_opacity"), img_opacity); //maybe i should just save uniform location
 
 		//texture
 		glActiveTexture(GL_TEXTURE0);
@@ -187,7 +195,7 @@ int main(int arc, char** args)
 
 		//bind buffers	
 		glBindVertexArray(VAO);
-		//draw triangle
+		//draw triangle using EBO
 		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
 		//swap double buffer
@@ -195,12 +203,10 @@ int main(int arc, char** args)
 		glfwPollEvents();
 	}
 
-	//Clean-up
+	///Clean-up
 	glDeleteVertexArrays(1, &VAO);
 	glDeleteBuffers(1, &VBO);
 	glDeleteBuffers(1, &EBO);
-
-
 
 	glfwTerminate();
 
@@ -213,9 +219,11 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
 
 void processInput(GLFWwindow *window, float* img_opacity) {
 
+	
 	if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
 		glfwSetWindowShouldClose(window, true);
 	}
+	/// Input to change some uniforms
 	else if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS) {
 		if ((*img_opacity) < 0.9995f) { (*img_opacity) += 0.0005f; }
 	}

@@ -1,3 +1,5 @@
+///// A file for abstracting loading shaders a little bit
+/////
 #include"ioshader.h"
 
 static int getError(int shader, GLenum shaderType, bool program=false) {
