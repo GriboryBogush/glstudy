@@ -22,8 +22,37 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 //handling keyboard input
 void processInput(GLFWwindow *window, glm::mat4* trans, float rotVal);
 
+// It would be nice to have a different project for
+// playing around with types and such
+// but for now this is all I've got
+
+/*
+void callback(std::string str) {
+	std::cout << str << std::endl;
+}
+
+// WHAT THE ? Function pointer syntax sucks!
+typedef void(*MY_TYPE)(std::string);
+*/
+
 int main(int arc, char** args)
 {
+	/*
+	const MY_TYPE something = callback;
+	const MY_TYPE smth = { [](std::string smth) { std::cout << smth << std::endl; } };
+
+	struct BEP {
+		int s;
+		// no compile time errors :(
+		MY_TYPE f;
+	};
+
+	const BEP name = { 10, callback };
+	name.f("Why?");
+	
+	smth("Function");
+	something("pointers!");
+	*/
 	//// Load and initalize glfw and glad
 	glfwInit();
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
