@@ -22,15 +22,19 @@ static int getError(int shader, GLenum shaderType, bool program=false) {
 		glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
 		if (!success) {
 
-			char* str;
+			char* str = nullptr;
 			char vstr[] = "VERTEX";
 			char fstr[] = "FRAGMENT";
 
-			if (shaderType == GL_VERTEX_SHADER) {
-				str = vstr;
-			}
-			else if (shaderType = GL_FRAGMENT_SHADER) {
-				str = fstr;
+			switch (shaderType) {
+				case GL_VERTEX_SHADER:
+					str = vstr;
+					break;
+				case GL_FRAGMENT_SHADER:
+					str = fstr;
+					break;
+				default:
+					throw std::exception("Unkown shader type");
 			}
 
 			glGetShaderInfoLog(shader, 512, NULL, infoLog);
