@@ -2,51 +2,44 @@
 /////
 #include"ioshader.h"
 
-static int getError(int shader, GLenum shaderType, bool program=false) {
+inline void getProgramLog(int shaderProgram) {
+	char infoLog[512];
+
+	glGetProgramInfoLog(shaderProgram, 512, NULL, infoLog);
+	std::cout << "ERROR::SHADER::PROGRAM::LINKING_FAILED\n" << infoLog << std::endl;
+}
+
+inline void getShaderLog(int shader, GLenum shaderType) {
+	char infoLog[512];
+
+	std::string shaderName;
+	switch (shaderType) {
+	case GL_VERTEX_SHADER:
+		shaderName = "VERTEX";
+		break;
+	case GL_FRAGMENT_SHADER:
+		shaderName = "FRAGMENT";
+		break;
+	default:
+		throw std::exception("Invalid shader type");
+	}
+
+	glGetShaderInfoLog(shader, 512, NULL, infoLog);
+	std::cout << "ERROR::SHADER::" << shaderName << "::COMPILATION_FAILED\n" << infoLog << std::endl;
+}
+
+static int getError(int shader, GLenum shaderType=0, bool program=false) {
 
 	int success;
-	char infoLog[512];
-	
-	if (program) {
+	program ? glGetProgramiv(shader, GL_LINK_STATUS, &success)
+			: glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
 
-		glGetProgramiv(shader, GL_LINK_STATUS, &success);
-		if (!success) {
-			glGetProgramInfoLog(shader, 512, NULL, infoLog);
-			std::cout << "ERROR::SHADER::PROGRAM::LINKING_FAILED\n" << infoLog << std::endl;
-			return -1;
-		}
-
-	}
-	else {
-
-		glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
-		if (!success) {
-
-			char* str = nullptr;
-			char vstr[] = "VERTEX";
-			char fstr[] = "FRAGMENT";
-
-			switch (shaderType) {
-				case GL_VERTEX_SHADER:
-					str = vstr;
-					break;
-				case GL_FRAGMENT_SHADER:
-					str = fstr;
-					break;
-				default:
-					throw std::exception("Unkown shader type");
-			}
-
-			glGetShaderInfoLog(shader, 512, NULL, infoLog);
-			std::cout << "ERROR::SHADER::" << str << "::COMPILATION_FAILED\n" << infoLog << std::endl;
-			return -1;
-		}
-
-
+	if (!success) {
+		program ? getProgramLog(shader) : getShaderLog(shader, shaderType);
+		return -1;
 	}
 
 	return success;
-
 }
 
 int compileShader(const char* filename, GLenum shaderType) {
