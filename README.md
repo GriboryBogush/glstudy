@@ -7,3 +7,9 @@ new comment standrad
 ////  - Section comment
 ///   - Function comment
 //    - Line comment
+
+
+# Dependecies
+  - OpenGL
+  - libglm-dev
+  - libglfw
